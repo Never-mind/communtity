@@ -9,7 +9,7 @@
 
 ##脚本
 ```bash
-mvn flyway:migrate
+mvn flyway:migrate //创建新的数据库表格语句
 mvn -Dmybatis.generator.overwrite=true mybatis-generator:generate
 
 ```

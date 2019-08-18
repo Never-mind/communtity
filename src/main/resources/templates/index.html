@@ -8,6 +8,16 @@
     <link rel="stylesheet" href="/css/community.css" />
     <script src="/js/jquery-3.4.1.min.js" type="application/javascript"></script>
     <script src="/js/bootstrap.min.js" type="application/javascript"></script>
+<script type="application/javascript">
+    window.onload = function () {
+        var closable = window.localStorage.getItem("closable");
+        if(closable == "true"){
+            window.close();
+            window.localStorage.removeItem("closable");
+        }
+    }
+</script>
+
 </head>
 <body>
 <div th:insert="~{navigation :: nav}"></div>
@@ -29,7 +39,7 @@
                     </h4>
                     <span th:text="${question.getDescription()}"></span><br>
                     <span class="text-desc"><span th:text="${question.getCommentCount()}"></span>个回复 ·<span th:text="${question.getViewCount()}"></span> 次浏览 · <span th:text="${#dates.format(question.getGmtCreate(),'yyyy-MM-dd HH-mm')}"></span>
-                        小时前</span>
+                        </span>
                 </div>
             </div>
             <nav aria-label="Page navigation">
