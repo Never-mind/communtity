@@ -10,13 +10,18 @@ import life.majiang.community.community.mapper.UserMapper;
 import life.majiang.community.community.model.Question;
 import life.majiang.community.community.model.QuestionExample;
 import life.majiang.community.community.model.User;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
+
 
 @Service
 public class QuestionService {
@@ -51,7 +56,9 @@ public class QuestionService {
         paginationDTO.setPagination(totalPage,page);
 
         Integer offset=size*(page-1);
-        List<Question> questions = questionMapper.selectByExampleWithRowbounds(new QuestionExample(), new RowBounds(offset, size));
+        QuestionExample questionExample = new QuestionExample();
+        questionExample.setOrderByClause("gmt_create desc");
+        List<Question> questions = questionMapper.selectByExampleWithRowbounds(questionExample, new RowBounds(offset, size));
 
         List<QuestionDTO> questionList = new ArrayList<>();
 
@@ -62,7 +69,7 @@ public class QuestionService {
             questionDTO.setUser(user);
             questionList.add(questionDTO);
         }
-        paginationDTO.setQuestions(questionList);
+        paginationDTO.setData(questionList);
 
         return paginationDTO;
     }
@@ -89,12 +96,13 @@ public class QuestionService {
             page=totalPage;
         }
 
-        paginationDTO.setPagination(totalCount,page);
+        paginationDTO.setPagination(totalPage,page);
 
         Integer offset=size*(page-1);
         QuestionExample example = new QuestionExample();
         example.createCriteria()
                 .andCreatorEqualTo(userId);
+        example.setOrderByClause("gmt_create desc");
         List<Question> questions = questionMapper.selectByExampleWithRowbounds(example, new RowBounds(offset, size));
         List<QuestionDTO> questionList = new ArrayList<>();
 
@@ -105,7 +113,7 @@ public class QuestionService {
             questionDTO.setUser(user);
             questionList.add(questionDTO);
         }
-        paginationDTO.setQuestions(questionList);
+        paginationDTO.setData(questionList);
 
         return paginationDTO;
 
@@ -132,11 +140,6 @@ public class QuestionService {
             question.setCommentCount(0);
             questionMapper.insert(question);
         }else {
-            /*Question updateQuestion = new Question();
-            updateQuestion.setGmtCreate(System.currentTimeMillis());
-            updateQuestion.setTitle(question.getTitle());
-            updateQuestion.setTag(question.getTag());
-            updateQuestion.setDescription(question.getDescription());*/
             question.setGmtCreate(System.currentTimeMillis());
             QuestionExample questionExample = new QuestionExample();
             questionExample.createCriteria()
@@ -153,5 +156,24 @@ public class QuestionService {
         updateQuestion.setId(id);
         updateQuestion.setViewCount(1);
         questionExpMapper.inCView(updateQuestion);
+    }
+
+    public List<QuestionDTO> selectRelated(QuestionDTO queryDTO) {
+        if(StringUtils.isBlank(queryDTO.getTag())){
+            return new ArrayList<>();
+        }
+        String[] tags = StringUtils.split(queryDTO.getTag(), ",");
+        String regexpTag = Arrays.stream(tags).collect(Collectors.joining("|"));
+        Question question = new Question();
+        question.setId(queryDTO.getId());
+        question.setTag(regexpTag);
+
+        List<Question> relatedQuestions = questionExpMapper.selectRelated(question);
+        List<QuestionDTO> questionDTOS = relatedQuestions.stream().map(q -> {
+            QuestionDTO questionDTO = new QuestionDTO();
+            BeanUtils.copyProperties(q,questionDTO);
+            return questionDTO;
+        }).collect(Collectors.toList());
+        return questionDTOS;
     }
 }

@@ -17,7 +17,7 @@
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <form class="navbar-form navbar-left">
+                <form class="navbar-form navbar-left" action="/" method="get">
                     <div class="form-group">
                         <input type="text" class="form-control" placeholder="Search">
                     </div>
@@ -27,6 +27,8 @@
                     <li th:if="${session.user==null}"><a href="https://github.com/login/oauth/authorize?client_id=4d957fc8f051868e5635&redirect_uri=http://localhost:8989/callback&scope=user&state=1">登录</a></li>
                     <li th:if="${session.user!=null}">
                         <a href="/publish">发布</a>
+                    </li>
+                    <li th:if="${session.user!=null}"><a href="/profile/replies">通知 <span class="badge" th:text="${session.unreadCount}"></span></a>
                     </li>
                     <li class="dropdown" th:if="${session.user !=null}">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"

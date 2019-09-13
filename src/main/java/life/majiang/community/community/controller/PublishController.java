@@ -1,5 +1,6 @@
 package life.majiang.community.community.controller;
 
+import life.majiang.community.community.cache.TagCache;
 import life.majiang.community.community.dto.QuestionDTO;
 import life.majiang.community.community.mapper.QuestionMapper;
 import life.majiang.community.community.model.Question;
@@ -30,6 +31,7 @@ public class PublishController {
         model.addAttribute("tag",question.getTag());
         //将id传进去作为修改问题的标识
         model.addAttribute("id",question.getId());
+        model.addAttribute("tags", TagCache.get());
 
         return "publish";
     }
